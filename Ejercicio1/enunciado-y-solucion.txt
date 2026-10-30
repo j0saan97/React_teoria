@@ -1,0 +1,73 @@
+EJERCICIO 1 - CONTADOR DE AÑOS
+==============================
+
+ENUNCIADO
+---------
+1. Crear un componente
+
+2. Recibir una prop con el año actual
+
+3. Ojo, usar funciones para sacar el año
+
+4. Usar estados y eventos para tener dos botones.
+    - Pasar al proximo año
+    - Ir al año anterior
+    - Mostrar en todo momento el año por pantalla
+
+5. Validar que el año sea un numero y que sea requerido (prop)
+
+6. Cambiar el año mediante un input de texto y que se cambie
+dinamicamente.
+
+
+CÓMO LO RESOLVÍ
+---------------
+Archivos:
+  - src/App.tsx                       -> componente padre
+  - src/components/ContadorAnio.tsx   -> el componente del ejercicio
+
+1. Componente
+   ContadorAnio es una función que devuelve JSX. Está en su propio archivo
+   y se exporta con "export default" para usarlo desde App.
+
+2. Prop con el año actual
+   App le pasa el año así:  <ContadorAnio anioInicial={obtenerAnioActual()} />
+   El componente la recibe desestructurando: function ContadorAnio({ anioInicial })
+
+3. Función para sacar el año
+   En App.tsx:
+       function obtenerAnioActual() {
+         return new Date().getFullYear()
+       }
+   new Date() crea la fecha de hoy y getFullYear() devuelve el año (ej: 2026).
+
+4. Estado y botones
+   const [anio, setAnio] = useState(anioInicial)
+   - La prop solo se usa como valor INICIAL del estado. A partir de ahí el
+     componente cambia su propio "anio".
+   - Botón "Año siguiente": setAnio((anio) => anio + 1)
+   - Botón "Año anterior":  setAnio((anio) => anio - 1)
+   - Se usa la forma con función (anio) => ... para partir siempre del
+     valor más reciente del estado.
+   - El año se pinta en <h1>Año: {anio}</h1>. Cada vez que cambia el estado,
+     React vuelve a renderizar y se ve el valor nuevo.
+
+5. Validar la prop (número y obligatoria)
+   Con TypeScript:
+       type Props = { anioInicial: number }
+   - "number"  -> si pasas un texto, TypeScript da error.
+   - Sin "?"   -> la prop es obligatoria; si no la pasas, da error.
+   (En cursos antiguos se usa PropTypes, pero desde React 19 PropTypes ya
+   no valida nada. Con TypeScript se hace con el tipo.)
+
+6. Input que cambia el año al escribir
+   <input type="text" value={anio} onChange={cambiarAnio} />
+   - Es un "input controlado": su valor sale del estado (value={anio}).
+   - En cada tecla se ejecuta cambiarAnio:
+         const valor = Number(e.target.value)
+         if (Number.isInteger(valor)) setAnio(valor)
+     Convierte el texto a número y solo actualiza el estado si es un número
+     entero, así no se pueden meter letras.
+   - Como el <h1>, los botones y el input usan el mismo estado, los tres
+     están siempre sincronizados.
+   - Detalle: si vacías el input se queda en 0, porque Number("") es 0.

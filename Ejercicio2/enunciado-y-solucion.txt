@@ -1,0 +1,53 @@
+EJERCICIO 2 - CONTADOR CON PROP (PROPS VS ESTADO)
+=================================================
+
+ENUNCIADO
+---------
+Crear un componente padre y un componente hijo para ver la diferencia entre
+una prop y el estado local:
+  - El padre tiene un número en su estado (empieza en 10) y un botón que le
+    suma 5.
+  - El padre le pasa ese número al hijo como prop (valorInicial).
+  - El hijo usa esa prop como valor inicial de su propio estado (contador)
+    y tiene un botón que suma 1 solo a su estado.
+  - El hijo muestra las dos cosas: la prop recibida y su estado local.
+  - Si el padre cambia la prop, el hijo debe sincronizar su estado con ella.
+
+
+CÓMO LO RESOLVÍ
+---------------
+Archivos:
+  - src/App.tsx                          -> componente padre
+  - src/components/ContadorConProp.tsx   -> componente hijo
+
+PADRE (App)
+   const [numeroPadre, setNumeroPadre] = useState(10)
+   - Botón "+5": setNumeroPadre(numeroPadre + 5)
+   - Le pasa el número al hijo:  <ContadorConProp valorInicial={numeroPadre} />
+
+HIJO (ContadorConProp)
+   type Props = { valorInicial: number }   -> la prop es número y obligatoria
+   const [contador, setContador] = useState(valorInicial)
+   - useState(valorInicial) solo usa la prop LA PRIMERA VEZ que se monta el
+     componente. Si luego la prop cambia, el estado NO se actualiza solo.
+   - Por eso hay un useEffect:
+         useEffect(() => {
+           setContador(valorInicial)
+         }, [valorInicial])
+     El array [valorInicial] significa "ejecuta esto cada vez que cambie
+     valorInicial". Así, cuando el padre suma 5, el hijo copia el nuevo valor
+     a su estado.
+   - Botón "Sumar al Estado": setContador(contador + 1). Solo cambia el
+     estado del hijo; la prop y el padre no se enteran.
+
+QUÉ SE VE AL PROBARLO
+   1. Pulsa "Sumar al Estado" varias veces -> solo cambia "Estado local".
+   2. Pulsa "+5" en el padre -> cambia la prop y el useEffect pone el estado
+      local igual a la prop. Lo que habías sumado en el hijo se pierde.
+   Conclusión: los datos bajan del padre al hijo por props; lo que cambia el
+   hijo en su estado se queda dentro del hijo.
+
+CAMBIOS RESPECTO AL CÓDIGO ORIGINAL (JS -> TypeScript)
+   - Tipo Props para la prop.
+   - Quitado "import React" (no hace falta en React 19).
+   - type="button" en los botones.

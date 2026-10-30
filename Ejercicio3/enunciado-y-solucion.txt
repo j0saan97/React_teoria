@@ -1,0 +1,71 @@
+EJERCICIO 3 - CARRITO DE LA COMPRA (EL HIJO AVISA AL PADRE)
+===========================================================
+
+ENUNCIADO
+---------
+Crear una tienda con un carrito:
+  - El padre (CarritoApp / App) guarda en su estado una lista de productos
+    con id, nombre, precio y cantidad (empiezan en 0).
+  - Por cada producto se pinta un componente hijo (ProductoItem).
+  - Si la cantidad es 0, el hijo muestra el botón "Añadir al carrito".
+    Si es mayor que 0, muestra los botones "-" y "+" con la cantidad en medio.
+  - Los botones del hijo deben cambiar el estado del PADRE, usando funciones
+    que el padre le pasa como props (alAñadir y alRestar).
+  - El padre muestra un resumen con el número total de productos y el
+    precio total, calculados a partir del estado.
+
+
+CÓMO LO RESOLVÍ
+---------------
+Archivos:
+  - src/App.tsx                       -> componente padre (estado + resumen)
+  - src/components/ProductoItem.tsx   -> componente hijo (un producto)
+
+PADRE (App)
+   type Producto = { id: number; nombre: string; precio: number; cantidad: number }
+   const [productos, setProductos] = useState<Producto[]>([...])
+   - El estado es un ARRAY de objetos. <Producto[]> le dice a TypeScript qué
+     forma tiene cada producto.
+
+   incrementarCantidad(id):
+       setProductos(productos.map(item =>
+         item.id === id ? { ...item, cantidad: item.cantidad + 1 } : item
+       ))
+   - map recorre todos los productos y devuelve un array NUEVO.
+   - Al que tiene ese id le crea una copia ({ ...item }) con la cantidad + 1.
+   - Los demás los deja igual.
+   - Nunca se modifica el estado directamente (item.cantidad++ estaría mal):
+     siempre se crea un array/objeto nuevo para que React detecte el cambio.
+
+   decrementarCantidad(id): igual, pero resta 1 y solo si cantidad > 0, para
+   no bajar de 0.
+
+   Totales (valores derivados, sin useState):
+       const totalItems  = productos.reduce((acc, item) => acc + item.cantidad, 0)
+       const totalPrecio = productos.reduce((acc, item) => acc + item.cantidad * item.precio, 0)
+   - Se calculan en cada render a partir de "productos". No hace falta
+     guardarlos en otro estado: si cambia productos, cambian solos.
+
+   Lista de hijos:
+       productos.map(prod => <ProductoItem key={prod.id} ... alAñadir={incrementarCantidad} alRestar={decrementarCantidad} />)
+   - key={prod.id} es obligatorio en listas para que React identifique cada
+     elemento.
+
+HIJO (ProductoItem)
+   - No tiene estado propio: solo pinta lo que le llega por props.
+   - Las funciones del padre van tipadas:  alAñadir: (id: number) => void
+   - Renderizado condicional con el operador ternario:
+         cantidad === 0 ? <botón Añadir> : <botones - cantidad +>
+   - Al pulsar un botón llama a la función del padre: onClick={() => alAñadir(id)}
+
+FLUJO COMPLETO AL PULSAR "+"
+   hijo llama alAñadir(id) -> se ejecuta incrementarCantidad en el padre
+   -> el padre actualiza "productos" -> React vuelve a renderizar el padre
+   -> el hijo recibe la nueva cantidad por props y el resumen se recalcula.
+   Esto es lo que explica el punto 3 de ejercicio2.txt: para que el padre se
+   entere de algo del hijo, el padre le pasa una función (callback).
+
+CAMBIOS RESPECTO AL CÓDIGO ORIGINAL (JS -> TypeScript)
+   - Tipos Props y Producto.
+   - Quitado "import React", type="button" en los botones.
+   - "$\rightarrow$" del comentario cambiado por "→".

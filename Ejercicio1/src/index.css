@@ -1,0 +1,30 @@
+body {
+  margin: 0;
+  font-family: system-ui, sans-serif;
+  display: flex;
+  justify-content: center;
+  padding-top: 60px;
+}
+
+.contador-anio {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+}
+
+.contador-anio-botones {
+  display: flex;
+  gap: 8px;
+}
+
+.contador-anio button,
+.contador-anio input {
+  font-size: 1rem;
+  padding: 8px 12px;
+}
+
+.contador-anio input {
+  width: 120px;
+  text-align: center;
+}
